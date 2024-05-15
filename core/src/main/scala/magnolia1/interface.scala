@@ -296,6 +296,8 @@ trait Param[Typeclass[_], Type] extends ReadOnlyParam[Typeclass, Type] {
   /** provides the default value for this parameter, as defined in the case class constructor */
   def default: Option[PType]
 
+  def dynamicDefault: Option[() => PType]
+
   override def toString: String = s"Param($label)"
 }
 
@@ -322,6 +324,9 @@ object Param {
     def typeName: TypeName = typeNameParam
     def index: Int = idx
     def repeated: Boolean = isRepeated
+    def dynamicDefault: Option[() => PType] = defaultVal.uncalledValue().fold[Option[() => PType]](None) { _ =>
+      Some(() => defaultVal.uncalledValue().get)
+    }
     def default: Option[PType] = defaultVal.value
     def typeclass: Tc[PType] = typeclassParam.value
     def dereference(t: T): PType = t.asInstanceOf[Product].productElement(idx).asInstanceOf[PType]
@@ -346,6 +351,9 @@ object Param {
     def typeName: TypeName = typeNameParam
     def index: Int = idx
     def repeated: Boolean = isRepeated
+    def dynamicDefault: Option[() => PType] = defaultVal.uncalledValue().fold[Option[() => PType]](None) { _ =>
+      Some(() => defaultVal.uncalledValue().get)
+    }
     def default: Option[PType] = defaultVal.value
     def typeclass: Tc[PType] = typeclassParam.value
     def dereference(t: T): PType = t.asInstanceOf[Product].productElement(idx).asInstanceOf[PType]
@@ -370,6 +378,9 @@ object Param {
     def typeName: TypeName = typeNameParam
     def index: Int = 0
     def repeated: Boolean = isRepeated
+    def dynamicDefault: Option[() => PType] = defaultVal.uncalledValue().fold[Option[() => PType]](None) { _ =>
+      Some(() => defaultVal.uncalledValue().get)
+    }
     def default: Option[PType] = defaultVal.value
     def typeclass: Tc[PType] = typeclassParam.value
     def dereference(t: T): PType = deref(t)
@@ -394,6 +405,9 @@ object Param {
     def typeName: TypeName = typeNameParam
     def index: Int = 0
     def repeated: Boolean = isRepeated
+    def dynamicDefault: Option[() => PType] = defaultVal.uncalledValue().fold[Option[() => PType]](None) { _ =>
+      Some(() => defaultVal.uncalledValue().get)
+    }
     def default: Option[PType] = defaultVal.value
     def typeclass: Tc[PType] = typeclassParam.value
     def dereference(t: T): PType = deref(t)

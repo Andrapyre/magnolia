@@ -5,6 +5,7 @@ import magnolia1.Monadic.Ops
 import scala.annotation.{compileTimeOnly, tailrec}
 import scala.collection.mutable
 import scala.language.higherKinds
+import scala.reflect.ClassTag
 import scala.reflect.macros._
 
 /** the object which defines the Magnolia macro */
@@ -946,6 +947,7 @@ private[magnolia1] object CompileTimeState {
 
 object CallByNeed { def apply[A](a: => A): CallByNeed[A] = new CallByNeed(() => a) }
 final class CallByNeed[+A](private[this] var eval: () => A) extends Serializable {
+  val uncalledValue: () => A = eval.fv
   lazy val value: A = {
     val result = eval()
     eval = null
