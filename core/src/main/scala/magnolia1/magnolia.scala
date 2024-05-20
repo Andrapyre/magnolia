@@ -495,7 +495,7 @@ object Magnolia {
               ${if (isValueClass) q"(t: $genericType) => t.$paramName" else q"$idx"},
               $repeated,
               $CallByNeedObj($ref),
-              ..${default.toList.map(d => q"$CallByNeedObj($d)")},
+              ..${default.toList.map(d => q"$CallByNeedObj.withValueEvaluator($d)")},
               $ArrayObj(..$annotations): _root_.scala.Array[_root_.scala.Any],
               $ArrayObj(..$inheritedAnnotations): _root_.scala.Array[_root_.scala.Any],
               $ArrayObj(..$typeAnnotations): _root_.scala.Array[_root_.scala.Any]
@@ -945,12 +945,27 @@ private[magnolia1] object CompileTimeState {
   }
 }
 
-object CallByNeed { def apply[A](a: => A): CallByNeed[A] = new CallByNeed(() => a) }
-final class CallByNeed[+A](private[this] var eval: () => A) extends Serializable {
-  val uncalledValue: () => A = eval.fv
+object CallByNeed {
+  def apply[A](a: => A): CallByNeed[A] = new CallByNeed(() => a, false)
+  def withValueEvaluator[A](a: => A): CallByNeed[A] = new CallByNeed(() => a, true)
+}
+final class CallByNeed[+A] private (private[this] var eval: () => A, private val supportDynamicValueEvaluation: Boolean) extends Serializable {
+  val valueEvaluator: Option[() => A] = {
+    if (supportDynamicValueEvaluation) {
+      val res = Some(eval.fv)
+      eval = null
+      res
+    } else {
+      None
+    }
+  }
   lazy val value: A = {
-    val result = eval()
-    eval = null
-    result
+    if (eval == null) {
+      valueEvaluator.get.fv()
+    } else {
+      val result = eval()
+      eval = null
+      result
+    }
   }
 }
