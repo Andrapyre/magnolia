@@ -31,8 +31,7 @@ object HasDefault {
         .flatMap(_.evaluateDefault)
         .headOption
         .map(res => res())
-    }
-
+  }
 
   /** chooses which subtype to delegate to */
   def split[T](ctx: SealedTrait[HasDefault, T])(): HasDefault[T] = new HasDefault[T] {
@@ -44,7 +43,7 @@ object HasDefault {
     override def getDynamicDefaultValueForParam(paramLabel: String): Option[Any] =
       ctx.subtypes.headOption match {
         case Some(sub) => sub.typeclass.getDynamicDefaultValueForParam(paramLabel)
-        case _ => None
+        case _         => None
       }
   }
 

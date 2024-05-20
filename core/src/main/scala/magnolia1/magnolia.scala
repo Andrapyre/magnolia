@@ -946,19 +946,26 @@ private[magnolia1] object CompileTimeState {
 }
 
 object CallByNeed {
-  def apply[A](a: => A): CallByNeed[A] = new CallByNeed(() => a, false)
-  def withValueEvaluator[A](a: => A): CallByNeed[A] = new CallByNeed(() => a, true)
+  def apply[A](a: => A): CallByNeed[A] = new CallByNeed(() => a, () => false)
+  def withValueEvaluator[A](a: => A): CallByNeed[A] = new CallByNeed(() => a, () => true)
 }
-final class CallByNeed[+A] private (private[this] var eval: () => A, private val supportDynamicValueEvaluation: Boolean) extends Serializable {
+
+// Both params are later nullified to reduce overhead and increase performance.
+// The supportDynamicValueEvaluation is passed as a function so that it can be nullified. Otherwise, there is no need for the function value.
+final class CallByNeed[+A] private (private[this] var eval: () => A, private var supportDynamicValueEvaluation: () => Boolean)
+    extends Serializable {
   val valueEvaluator: Option[() => A] = {
-    if (supportDynamicValueEvaluation) {
+    val finalRes = if (supportDynamicValueEvaluation()) {
       val res = Some(eval.fv)
       eval = null
       res
     } else {
       None
     }
+    supportDynamicValueEvaluation = null
+    finalRes
   }
+
   lazy val value: A = {
     if (eval == null) {
       valueEvaluator.get.fv()
