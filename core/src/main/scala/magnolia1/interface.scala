@@ -296,6 +296,7 @@ trait Param[Typeclass[_], Type] extends ReadOnlyParam[Typeclass, Type] {
   /** provides the default value for this parameter, as defined in the case class constructor */
   def default: Option[PType]
 
+  /** provides a function to evaluate the default value for this parameter, as defined in the case class constructor */
   def evaluateDefault: Option[() => PType] = None
 
   override def toString: String = s"Param($label)"
