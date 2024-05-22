@@ -963,6 +963,9 @@ object CallByNeed {
 // The supportDynamicValueEvaluation is passed as a function so that it can be nullified. Otherwise, there is no need for the function value.
 final class CallByNeed[+A] private (private[this] var eval: () => A, private var supportDynamicValueEvaluation: () => Boolean)
     extends Serializable {
+
+  def this(eval: () => A) = this(eval, () => false)
+
   val valueEvaluator: Option[() => A] = {
     val finalRes = if (supportDynamicValueEvaluation()) {
       val res = Some(eval.fv)
