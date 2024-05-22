@@ -5,7 +5,6 @@ import magnolia1.Monadic.Ops
 import scala.annotation.{compileTimeOnly, tailrec}
 import scala.collection.mutable
 import scala.language.higherKinds
-import scala.reflect.ClassTag
 import scala.reflect.macros._
 
 /** the object which defines the Magnolia macro */
