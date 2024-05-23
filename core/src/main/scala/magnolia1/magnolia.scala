@@ -963,6 +963,7 @@ object CallByNeed {
 final class CallByNeed[+A] private (private[this] var eval: () => A, private var supportDynamicValueEvaluation: () => Boolean)
     extends Serializable {
 
+  // This second constructor is necessary to support backwards compatibility for v1.1.9 and earlier
   def this(eval: () => A) = this(eval, () => false)
 
   val valueEvaluator: Option[() => A] = {
